@@ -9,6 +9,7 @@ use App\Inventory\Weapon;
 use App\Tile\Building;
 use App\Tile\Bush;
 use App\Tile\Grass;
+use App\Tile\Tile;
 use App\Tile\Water;
 
 class ArenaAugeas extends Arena
@@ -132,14 +133,54 @@ class ArenaAugeas extends Arena
         $buildings = [
             new Building(4, 8),
             new Building(5, 8),
-            new Building(6, 8), 
+            new Building(6, 8),
             new Building(4, 9),
             new Building(5, 9),
             new Building(6, 9),
         ];
-       
+
         $tiles = [...$waters, ...$grasses, ...$bushes, ...$buildings];
 
         parent::__construct($hero, $monsters, $tiles);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function digArena(): void
+    {
+
+        $heroPosition = $this->getTile($this->getHero()->getX(), $this->getHero()->getY());
+        $heroStuff = $this->getHero()->getSecondHand();
+        if ($heroPosition instanceof Grass && isset($heroStuff)) {
+            $heroPosition->dig();
+            $this->fill($heroPosition);
+
+        } else {
+            throw new \Exception("you can't dig this tile");
+        }
+    }
+
+    public function fill(Tile $tile): void
+    {
+        foreach ($this->getAdjacentTiles($tile) as $adjacentTile) {
+            if ($tile instanceof Grass && $tile->isDigged() && $adjacentTile instanceof Water) {
+                $this->replaceTile($tile);
+            } else { $adjacentTile instanceof Grass ??
+                $this->fill($adjacentTile);
+            }
+        }
+
+    }
+
+    private function getAdjacentTiles(Tile $tile): array
+    {
+        $adjacentTiles[1] = $this->getTile($tile->getX() + 1, $tile->getY());
+        $adjacentTiles[2] = $this->getTile($tile->getX() - 1, $tile->getY());
+        $adjacentTiles[3] = $this->getTile($tile->getX(), $tile->getY() + 1);
+        $adjacentTiles[4] = $this->getTile($tile->getX(), $tile->getY() - 1);
+
+
+        return $adjacentTiles;
     }
 }

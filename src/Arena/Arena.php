@@ -6,6 +6,7 @@ use App\Fighter\Fighter;
 use App\Fighter\Hero;
 use App\Movable;
 use App\Tile\Tile;
+use App\Tile\Water;
 use Exception;
 
 class Arena
@@ -41,7 +42,10 @@ class Arena
         return null;
     }
 
-    public function arenaMove(string $direction)
+    /**
+     * @throws Exception
+     */
+    public function arenaMove(string $direction): void
     {
         $this->move($this->getHero(), $direction);
 
@@ -53,7 +57,10 @@ class Arena
         }
     }
 
-    public function move(Movable $movable, string $direction)
+    /**
+     * @throws Exception
+     */
+    public function move(Movable $movable, string $direction): void
     {
         $x = $movable->getX();
         $y = $movable->getY();
@@ -87,6 +94,31 @@ class Arena
         return sqrt($Xdistance ** 2 + $Ydistance ** 2);
     }
 
+    public function addTile(Tile $tile)
+    {
+        $tileToRemove[0] = $tile->getX();
+        $tileToRemove[1] = $tile->getY();
+        $this->tiles[] = new Water($tile->getX(), $tile->getY());
+
+        return $tileToRemove;
+    }
+    public function removeTile(Tile $tile): void{
+       foreach ($this->tiles as $key => $item) {
+           if ($tile === $this->tiles[$key])
+           unset($this->tiles[$key]);
+       };
+
+    }
+
+    public function replaceTile(Tile $newTile): void {
+        $tileToRemove = $this->addTile($this->getTile($newTile->getX(), $newTile->getY()));
+        $this->removeTile($this->getTile($tileToRemove[0], $tileToRemove[1]));
+
+    }
+
+    /**
+     * @throws Exception
+     */
     public function battle(int $id): void
     {
         $monster = $this->getMonsters()[$id];
