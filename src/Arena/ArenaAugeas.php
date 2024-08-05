@@ -149,10 +149,10 @@ class ArenaAugeas extends Arena
      */
     public function digArena(): void
     {
-
-        $heroPosition = $this->getTile($this->getHero()->getX(), $this->getHero()->getY());
-        $heroStuff = $this->getHero()->getSecondHand();
-        if ($heroPosition instanceof Grass && isset($heroStuff)) {
+        $hero = $this->getHero();
+        $heroPosition = $this->getTile($hero->getX(), $hero->getY());
+        $shovel = $hero->getSecondHand();
+        if ($heroPosition instanceof Grass && isset($shovel)) {
             $heroPosition->dig();
             $this->fill($heroPosition);
 
@@ -163,22 +163,28 @@ class ArenaAugeas extends Arena
 
     public function fill(Tile $tile): void
     {
-        foreach ($this->getAdjacentTiles($tile) as $adjacentTile) {
-            if ($tile instanceof Grass && $tile->isDigged() && $adjacentTile instanceof Water) {
-                $this->replaceTile($tile);
-            } else { $adjacentTile instanceof Grass ??
-                $this->fill($adjacentTile);
-            }
+        $tiles = $this->getAdjacentTiles($tile);
+        foreach ($tiles as $adjacentTile) {
+                $tile instanceof grass && $tile->isDigged() && $adjacentTile instanceof Water ?
+                $this->replaceTile($tile) :
+                    null;
+                $tile instanceof Water && $adjacentTile instanceof Grass &&
+                $adjacentTile->isDigged() ?
+                $this->fill($adjacentTile)
+                : null;
         }
 
     }
 
     private function getAdjacentTiles(Tile $tile): array
     {
-        $adjacentTiles[1] = $this->getTile($tile->getX() + 1, $tile->getY());
-        $adjacentTiles[2] = $this->getTile($tile->getX() - 1, $tile->getY());
-        $adjacentTiles[3] = $this->getTile($tile->getX(), $tile->getY() + 1);
-        $adjacentTiles[4] = $this->getTile($tile->getX(), $tile->getY() - 1);
+        $x = $tile->getX();
+        $y = $tile->getY();
+
+        $adjacentTiles[0] = $this->getTile($x + 1, $y);
+        $adjacentTiles[1] = $this->getTile($x - 1, $y);
+        $adjacentTiles[2] = $this->getTile($x, $y + 1);
+        $adjacentTiles[3] = $this->getTile($x, $y - 1);
 
 
         return $adjacentTiles;
