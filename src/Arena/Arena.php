@@ -9,7 +9,7 @@ use App\Tile\Tile;
 use App\Tile\Water;
 use Exception;
 
-class Arena
+abstract class Arena
 {
     public const DIRECTIONS = [
         'N' => [0, -1],
@@ -30,6 +30,8 @@ class Arena
         $this->monsters = $monsters;
         $this->tiles = $tiles;
     }
+
+    abstract function isVictory(): bool;
 
     public function getTile(int $x, int $y): ?Tile
     {

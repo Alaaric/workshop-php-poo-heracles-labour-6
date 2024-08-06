@@ -14,6 +14,8 @@ use App\Tile\Water;
 
 class ArenaAugeas extends Arena
 {
+    const VICTORY_X = 5;
+    const VICTORY_Y = 7;
     public function __construct()
     {
         $sword = new Weapon(10);
@@ -25,6 +27,7 @@ class ArenaAugeas extends Arena
         $hero->setSecondHand($shovel);
 
         $monsters = [];
+
 
         $grasses = [
             new Grass(0, 0),
@@ -163,17 +166,32 @@ class ArenaAugeas extends Arena
 
     public function fill(Tile $tile): void
     {
-        $tiles = $this->getAdjacentTiles($tile);
-        foreach ($tiles as $adjacentTile) {
-                $tile instanceof grass && $tile->isDigged() && $adjacentTile instanceof Water ?
-                $this->replaceTile($tile) :
-                    null;
-                $tile instanceof Water && $adjacentTile instanceof Grass &&
-                $adjacentTile->isDigged() ?
-                $this->fill($adjacentTile)
-                : null;
+
+        $adjacentTiles = $this->getAdjacentTiles($tile);
+        foreach ($adjacentTiles as $adjacentTile) {
+            if($adjacentTile instanceof Water) {
+                $this->replaceTile($tile);
+
+                $currentArena = $this->getTiles();
+
+                $currentTile = $currentArena[array_key_last($currentArena)];
+
+                $currentAdjacentTiles = $this->getAdjacentTiles($currentTile);
+
+                foreach ($currentAdjacentTiles as $currentAdjacentTile) {
+                    if ($currentAdjacentTile instanceof Grass && $currentAdjacentTile->isDigged()) {
+                        $this->fill($currentAdjacentTile);
+                    }
+                }
+
+            }
+
         }
 
+    }
+    public function isVictory(): bool
+    {
+     return $this->getTile(self::VICTORY_X, self::VICTORY_Y) instanceof Water;
     }
 
     private function getAdjacentTiles(Tile $tile): array
